@@ -120,3 +120,133 @@ Performing the RSA Cryptography on the Encrypted Hash to get the following Ciphe
 Applying the RSA Cryptography to Decrypt the above Ciphertext
 b10a8db164e0754105b7a99be72e3fe5
 ```
+# PGP (Pretty Good Privacy, OpenPGP RFC 4880)
+It is a file/email based encryption covering three major aspects:
+1. Data Communication (Achieved via HASH function. I have used MD5. however, SHA-1 or SHA-2 can also be used)
+2. Data Privacy (Achieved through Symmetric Encryption. I have currently excluded this part)
+3. Authentication. (Achieved using the RSA Cryptography)
+## PGP Encryption
+PGP follows the following steps for Encryption according to OpenPGP Standard RFC 4880
+1. Create Secure Hash function for the message
+2. Perform RSA crytpography on the Hashed Message
+3. Concatenate the Original message along with the ciphertext obtained at the previous step
+4. Perform ZIP compression algorithm on the concatenation and send the final ZIP
+### Snippet of PGP Encryption
+```python
+def encrypt(message,public):
+    '''
+    FUNCTION
+    ----------
+    PGP follows the Following steps for Encryption according to OpenPGP Standard RFC 4880
+    1. Create Secure Hash function for the message
+    2. Perform RSA crytpography on the Hashed Message
+    3. Concatenate the Original message along with the ciphertext obtained at the previous step
+    4. Perform ZIP compression algorithm on the concatenation and send the final ZIP
+
+    PARAMETERS
+    ----------
+    1. Message : Type <str>. Plaintext which is to be encrypted
+    2. Public Key : Type <tuple> containing the pairs (e,n).
+
+    RETURN
+    -------
+    pgpCipher : Zipped Ciphertext of type <Bytes>
+
+    For More information, please read RFC 4880, RFC 3447, RFC 1321
+    '''
+    message=message.encode('ascii')
+    # Step 1.
+    print("1. Applying the HASH Function on the Message")
+    md5hashed=md5.md5_to_hex(md5.md5(message))
+    print(md5.md5_to_hex(md5.md5(message)),' <= "',message.decode('ascii'),'"', sep='')
+    # Step 2.
+    print("Performing the RSA Cryptography on the Encrypted Hash")
+    ciphertext=rsa.encrypt(public,md5hashed)
+    # Step 3.
+    ctext=''
+    for i in ciphertext:
+        ctext=ctext+str(i)+' '
+    ciphertext=ctext
+    print("Concatenating RSA Ciphertext with the Original Message")
+    concat_text=ciphertext+'!!!'+message.decode('ascii')
+    byte_text=concat_text.encode('ascii')
+    # Step 4.
+    print("Applying ZIP compression Algorithm on the Concatenation Text")
+    pgpCipher=zip.compress(byte_text)
+    print("Successfully Performed PGP encryption !")
+    return pgpCipher
+```
+### Output after PGP Encryption
+```cmd
+1. Applying the HASH Function on the Message
+b10a8db164e0754105b7a99be72e3fe5 <= "Hello World"
+Performing the RSA Cryptography on the Encrypted Hash
+[114, 75, 108, 41, 118, 18, 114, 75, 54, 68, 45, 108, 13, 113, 68, 75, 108, 113, 114, 13, 41, 57, 57, 114, 45, 13, 38, 45, 39, 82, 45, 113]
+Concatenating RSA Ciphertext with the Original Message
+Applying ZIP compression Algorithm on the Concatenation Text
+Successfully Performed PGP encryption !
+CipherText=b"x\x9c-\xcb\xc1\r\x800\x0c\x03\xc0U\xdc\r0Ii\xd8\x80\rX\x80\xfe*Ub\xff\x07I\x8a\xe4O\xce\x0e\xa9h\x15\xdc\x0cJ\x90\x86\xc8\xc2\xaa8\x9cWKq\x96\x80\x7f\xce\x14\x8d\xc2?k\x8b\xc4\x1d{\x81\xe4\xa3\x9c\xb0=\xc5\xa9\x94r\xf51&\xee\xf9\x8e\xe7\x036\xb1\x17\xa1"
+```
+## PGP Decryption
+PGP follows the Following steps for Decryption according to OpenPGP Standard RFC 4880.
+1. Apply the ZIP Decompression Algorithm on the PGP Cipher Text to get the concatenated text.
+2. De-concatenate the Concatenated text to split into ciphertext and plain text.
+3. Apply RSA cryptography to decrypt the ciphertext into the HASHED message.
+4. Apply the HASH function on the separated plain text.
+5. Compare the two hash functions. If the two hashes are same, the PGP decryption is successful.
+
+### PGP Decryption Snippet
+```python
+def decrypt(pgpCipher,private):
+    '''
+    FUNCTION
+    ----------
+    PGP follows the Following steps for Decryption according to OpenPGP Standard RFC 4880.
+    1. Apply the ZIP Decompression Algorithm on the PGP Cipher Text to get the concatenated text.
+    2. De-concatenate the Concatenated text to split into ciphertext and plain text.
+    3. Apply RSA cryptography to decrypt the ciphertext into the HASHED message.
+    4. Apply the HASH function on the separated plain text.
+    5. Compare the two hash functions. If the two hashes are same, the PGP decryption is successful.
+
+    PARAMETERS
+    ----------
+    1. PGPCiphertext : Type <Bytes>. Ciphertext which is to be decrypted
+    2. Private Key : Type <tuple> containing the pairs (d,n).
+
+    RETURN
+    -------
+    Message : Original type <str>
+
+    For More information, please read RFC 4880, RFC 3447, RFC 1321
+    '''
+    print("Applying the PGP decryption Algorithm")
+    print("1. Applying the ZIP Decompression Algorithm on the PGP Cipher Text")
+    concat_text=(zip.decompress(pgpCipher)).decode('ascii')
+    print("2. De-concatenating the Concatenated text")
+    separate=concat_text.split('!!!')
+    cipher=[int(i) for i in separate[0].split()]
+    print("3. Applying the RSA Cryptography to Decrypt the Ciphertext")
+    md5hashed=rsa.decrypt(private,cipher)
+    print("4. Applying the HASH function for the De-concatenated plaintext")
+    print(md5.md5_to_hex(md5.md5(separate[1].encode('ascii'))),' <= "',separate[1],'"', sep='')
+    print("5. Comparing the HASH of Decrypted Ciphertext and HASHED Plaintext")
+    md5hashed1=md5.md5_to_hex(md5.md5(separate[1].encode('ascii')))
+    if md5hashed==md5hashed1:
+        print ("Successfully Decrypted the Message")
+        return (separate[1])
+    else:
+        print ("Invalid Private Key Provided")
+        return 0
+```
+### PGP Decryption Output
+```cmd
+Applying the PGP decryption Algorithm
+1. Applying the ZIP Decompression Algorithm on the PGP Cipher Text
+2. De-concatenating the Concatenated text
+3. Applying the RSA Cryptography to Decrypt the Ciphertext
+b10a8db164e0754105b7a99be72e3fe5
+4. Applying the HASH function for the De-concatenated plaintext
+b10a8db164e0754105b7a99be72e3fe5 <= "Hello World"
+5. Comparing the HASH of Decrypted Ciphertext and HASHED Plaintext
+Successfully Decrypted the Message
+```
