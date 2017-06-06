@@ -12,7 +12,7 @@ The MD5 algorithm is a widely used hash function producing a 128-bit hash value.
 
 So, Do we mean that the two different messages are same ?. Unfortunately and luckily YES. However, it is worth noting that the probability of 2 different messages arriving at the same hash value is almost 0.
 
-# Snippet
+## Snippet
 ```PYTHON
 def md5(message):
  
@@ -42,7 +42,7 @@ def md5(message):
 
 ```
 
-### OUTPUT
+## OUTPUT
 ```python
 ac4a2ff915edefbc151938a70f4a6db3 <= "He is a good person"
 ```
