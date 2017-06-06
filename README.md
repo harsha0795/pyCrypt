@@ -1,3 +1,4 @@
+
 .
 # pyCrypt (version 1.0)- Python Cryptography
 Cryptogrphy Algorithms implemented using Python 3.6.0.
@@ -44,7 +45,7 @@ def md5(message):
 ```
 
 ## OUTPUT
-```python
+```cmd
 ac4a2ff915edefbc151938a70f4a6db3 <= "He is a good person"
 ```
 
@@ -66,3 +67,56 @@ Encrytpion is done Using Bob's public key in the following manner:
 ### RSA Decryption
 Decryption is done using Bob's private key in the following manner:
 ![alt text](https://raw.githubusercontent.com/harsha0795/pyCrypt/master/img/RSADE.png)
+### Snippet
+```python
+def keyGen():
+    ''' Generate  Keypair '''
+    i_p=randint(0,20)
+    i_q=randint(0,20)
+    # Instead of Asking the user for the prime Number which in case is not feasible,
+    # generate two numbers which is much highly secure as it chooses higher primes
+    while i_p==i_q:
+        continue
+    primes=PrimeGen(100)
+    p=primes[i_p]
+    q=primes[i_q]
+    #computing n=p*q as a part of the RSA Algorithm
+    n=p*q
+    #Computing lamda(n), the Carmichael's totient Function.
+    # In this case, the totient function is the LCM(lamda(p),lamda(q))=lamda(p-1,q-1)
+    # On the Contrary We can also apply the Euler's totient's Function phi(n)
+    #  which sometimes may result larger than expected
+    lamda_n=int(lcm(p-1,q-1))
+    e=randint(1,lamda_n)
+    #checking the Following : whether e and lamda(n) are co-prime
+    while math.gcd(e,lamda_n)!=1:
+        e=randint(1,lamda_n)
+    #Determine the modular Multiplicative Inverse
+    d=modinv(e,lamda_n)
+    #return the Key Pairs
+    # Public Key pair : (e,n), private key pair:(d,n)
+    return ((e,n),(d,n))
+
+def encrypt(pk,message):
+    """ Perform RSA Encryption Algorithm"""
+    key, n = pk
+    #Convert each letter in the plaintext to numbers based on the character using a^b mod m
+    cipher = [(ord(char) ** key) % n for char in message]
+    #Return the array of bytes
+    return cipher
+
+def decrypt(pk,cipher):
+    '''Perform RSA Decryption Algorithm '''
+    key, n = pk
+    #Generate the plaintext based on the ciphertext and key using a^b mod m
+    message = [chr((int(char) ** key) % n) for char in cipher]
+    #Return the array of bytes as a string
+    return ''.join(message)
+```
+### Output
+```cmd
+Performing the RSA Cryptography on the Encrypted Hash to get the following Ciphertext
+[114, 75, 108, 41, 118, 18, 114, 75, 54, 68, 45, 108, 13, 113, 68, 75, 108, 113, 114, 13, 41, 57, 57, 114, 45, 13, 38, 45, 39, 82, 45, 113]
+Applying the RSA Cryptography to Decrypt the above Ciphertext
+b10a8db164e0754105b7a99be72e3fe5
+```
