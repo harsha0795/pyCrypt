@@ -1,4 +1,4 @@
-## pyCrypt (version 1.0)
+# pyCrypt (version 1.0)- Python Cryptography
 Cryptogrphy Algorithms implemented using Python 3.6.0.
 
 I have implemented the following Algorithms :
@@ -7,12 +7,12 @@ I have implemented the following Algorithms :
 3. PGP (Pretty Good Privacy. An Email Encryption Algorithm although I have not added the Symmetric key Encrytpion)
 
 
-## MD5 (Message Digest Algorithm)
+# MD5 (Message Digest Algorithm)
 The MD5 algorithm is a widely used hash function producing a 128-bit hash value. Creating a HASH out of the Message is an irreversible process. This means that once a HASH is created for a Message, it is not possible to produce the message from the HASH value. We tell that a pair of Message is Authentic if their hash values are same. But many message might end up with the same hash value.
 
 So, Do we mean that the two different messages are same ?. Unfortunately and luckily YES. However, it is worth noting that the probability of 2 different messages arriving at the same hash value is almost 0.
 
-### Snippet
+# Snippet
 ```PYTHON
 def md5(message):
  
